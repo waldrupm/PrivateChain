@@ -38,13 +38,14 @@ class Block {
     validate() {
         let self = this;
         return new Promise((resolve, reject) => {
-            // Save in auxiliary variable the current block hash
-                                            
-            // Recalculate the hash of the Block
-            // Comparing if the hashes changed
-            // Returning the Block is not valid
+            let currentHash = self.hash;
+            let newHash = SHA256(JSON.stringify(self)).toString();
             
-            // Returning the Block is valid
+            if (currentHash === newHash) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
 
         });
     }
@@ -59,6 +60,15 @@ class Block {
      *     or Reject with an error.
      */
     getBData() {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            let decodedObj = JSON.parse(hex2ascii(self.body));
+            if (decodedObj.data === 'Genesis Block') {
+                resolve(null);
+            } else {
+                resolve(decodedObj.data);
+            }
+        });
         // Getting the encoded data saved in the Block
         // Decoding the data to retrieve the JSON representation of the object
         // Parse the data to an object to be retrieve.
