@@ -65,8 +65,10 @@ class Block {
             let decodedObj = JSON.parse(hex2ascii(self.body));
             if (decodedObj.data === 'Genesis Block') {
                 resolve(null);
-            } else {
+            } else if (decodedObj.data != null) {
                 resolve(decodedObj.data);
+            } else {
+                reject(Error("Block object data unavailable"));
             }
         });
         // Getting the encoded data saved in the Block
