@@ -132,7 +132,14 @@ class Blockchain {
                     //Valid bitcoin message
                     //Build block
                     let blockData = { owner: address, star };
+                    console.log(blockData);
                     let block = new BlockClass.Block({data: blockData});
+                    let addedBlock = await this._addBlock(block);
+                    if(addedBlock) {
+                        resolve(addedBlock);
+                    } else {
+                        reject("Could not add block.");
+                    }
                 } else {
                     //Invalid message
                     reject("Bitcoin message invalid.");
