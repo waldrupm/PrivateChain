@@ -64,23 +64,25 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-          let currentHeight = await self.getChainHeight();
-          if (currentHeight === -1) {
+          let prevHeight = await self.getChainHeight();
+          if (prevHeight === -1) {
             // Adding Genesis Block
             block.previousBlockHash = null;
 
           } else {
             // Adding non-Genesis block
-            block.previousBlockHash = self.chain[currentHeight - 1].hash;
+            block.previousBlockHash = self.chain[prevHeight - 1].hash;
           }
           block.time = new Date().getTime().toString().slice(0,-3);
-          block.height = currentHeight + 1;
+          block.height = prevHeight + 1;
           block.hash = SHA256(JSON.stringify(block)).toString();
           self.chain.push(block);
-          currentHeight == -1 ? self.height = 1 : self.height += 1;
+          prevHeight == -1 ? self.height = 1 : self.height += 1;
+          //TODO - Remove console logs
           console.log(self.height);
           console.log((self.chain[self.height-1]));
-          
+          let newHeight = await self.getChainHeight();
+          newHeight > prevHeight ? resolve(self.chain[self.height-1]) : reject("Could not add block");
         });
     }
 
@@ -94,7 +96,10 @@ class Blockchain {
      */
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
-            
+            let message = `${address}:${new Date().getTime().toString().slice(0,-3)}:starRegistry`;
+            //TODO - Remove console logs
+            console.log(message);
+            resolve(message);
         });
     }
 
@@ -118,7 +123,24 @@ class Blockchain {
     submitStar(address, message, signature, star) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            
+            let prevHeight = await self.getChainHeight;
+            let messageSentTime = parseInt(message.split(':')[1]);
+            let currentTime = parseInt(new Date().getTime().toString().slice(0,-3));
+            if (currentTime - messageSentTime < 300) {
+                //Valid message timing
+                if (bitcoinMessage.verify(message, address, signature)) {
+                    //Valid bitcoin message
+                    //Build block
+                    let blockData = { owner: address, star };
+                    let block = new BlockClass.Block({data: blockData});
+                } else {
+                    //Invalid message
+                    reject("Bitcoin message invalid.");
+                }
+            } else {
+                //Invalid message timing
+                reject("Message not sent within 5 minutes.");
+            }
         });
     }
 
