@@ -164,7 +164,7 @@ class Blockchain {
            if (block) {
                resolve(block);
            } else {
-               reject("No block with that hash.");
+               resolve(null);
            }
         });
     }
@@ -195,8 +195,16 @@ class Blockchain {
     getStarsByWalletAddress (address) {
         let self = this;
         let stars = [];
-        return new Promise((resolve, reject) => {
-            
+        return new Promise(async (resolve, reject) => {
+            for(let i = 1; i < self.chain.length; i++) {
+                let currentData = await self.chain[i].getBData();
+                console.log(currentData);
+                if(currentData.owner === address) {
+                    //Star is owned by address
+                    stars.push(currentData);
+                }
+            }
+            resolve(stars);
         });
     }
 
@@ -213,15 +221,17 @@ class Blockchain {
             self.chain.forEach(currentItem => {
                 if(currentItem.height === 0) {
                     //Genesis block
-                    currentItem.validate() ? return : reject("Genesis block doesn't validate");
+                    currentItem.validate() ? true : errorLog.push("Genesis block does not validate");
                     return;
                 } else {
                     //Not genesis block
-                    //Validate block
+                    currentItem.validate() ? true : errorLog.push(`Block ${currentItem.height} hash does not validate`);
                     //validate previousblockhash
-                    //Reject if error
+                    currentItem.previousBlockHash === self.chain[currentItem.height-2].hash ? true : errorLog.push(`Block ${currentItem.height} previous hash does not validate`);
+                    return;
                 }
             });
+            resolve(errorLog);
         });
     }
 
