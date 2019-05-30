@@ -160,7 +160,12 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-           
+           let block = self.chain.filter(item => item.hash === hash)[0];
+           if (block) {
+               resolve(block);
+           } else {
+               reject("No block with that hash.");
+           }
         });
     }
 
@@ -205,7 +210,18 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            
+            self.chain.forEach(currentItem => {
+                if(currentItem.height === 0) {
+                    //Genesis block
+                    currentItem.validate() ? return : reject("Genesis block doesn't validate");
+                    return;
+                } else {
+                    //Not genesis block
+                    //Validate block
+                    //validate previousblockhash
+                    //Reject if error
+                }
+            });
         });
     }
 
