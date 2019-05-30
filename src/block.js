@@ -39,11 +39,14 @@ class Block {
         let self = this;
         return new Promise((resolve, reject) => {
             let currentHash = self.hash;
+            self.hash = null;
             let newHash = SHA256(JSON.stringify(self)).toString();
             
             if (currentHash === newHash) {
+                self.hash = currentHash;
                 resolve(true);
             } else {
+                self.hash = currentHash;
                 resolve(false);
             }
 

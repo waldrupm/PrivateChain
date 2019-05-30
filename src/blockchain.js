@@ -68,18 +68,18 @@ class Blockchain {
           if (prevHeight === -1) {
             // Adding Genesis Block
             block.previousBlockHash = null;
+            block.height = 0;
 
           } else {
             // Adding non-Genesis block
             block.previousBlockHash = self.chain[prevHeight - 1].hash;
+            block.height = prevHeight;
           }
           block.time = new Date().getTime().toString().slice(0,-3);
-          block.height = prevHeight + 1;
           block.hash = SHA256(JSON.stringify(block)).toString();
           self.chain.push(block);
           prevHeight == -1 ? self.height = 1 : self.height += 1;
           //TODO - Remove console logs
-          console.log(self.height);
           console.log((self.chain[self.height-1]));
           let newHeight = await self.getChainHeight();
           newHeight > prevHeight ? resolve(self.chain[self.height-1]) : reject("Could not add block");
@@ -217,17 +217,17 @@ class Blockchain {
     validateChain() {
         let self = this;
         let errorLog = [];
-        return new Promise(async (resolve, reject) => {
-            self.chain.forEach(currentItem => {
+        return new Promise((resolve, reject) => {
+            self.chain.forEach(async (currentItem) => {
                 if(currentItem.height === 0) {
                     //Genesis block
-                    currentItem.validate() ? true : errorLog.push("Genesis block does not validate");
+                    await currentItem.validate() ? true : errorLog.push("Genesis block does not validate");
                     return;
                 } else {
                     //Not genesis block
-                    currentItem.validate() ? true : errorLog.push(`Block ${currentItem.height} hash does not validate`);
+                    await currentItem.validate() ? true : errorLog.push(`Block ${currentItem.height} hash does not validate`);
                     //validate previousblockhash
-                    currentItem.previousBlockHash === self.chain[currentItem.height-2].hash ? true : errorLog.push(`Block ${currentItem.height} previous hash does not validate`);
+                    currentItem.previousBlockHash === self.chain[currentItem.height-1].hash ? true : errorLog.push(`Block ${currentItem.height} previous hash does not validate`);
                     return;
                 }
             });
