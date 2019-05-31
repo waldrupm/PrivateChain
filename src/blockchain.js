@@ -217,20 +217,29 @@ class Blockchain {
     validateChain() {
         let self = this;
         let errorLog = [];
-        return new Promise((resolve, reject) => {
-            self.chain.forEach(async (currentItem) => {
+        return new Promise(async (resolve, reject) => {
+            await Promise.all(self.chain.map(async currentItem => {
                 if(currentItem.height === 0) {
-                    //Genesis block
                     await currentItem.validate() ? true : errorLog.push("Genesis block does not validate");
-                    return;
                 } else {
-                    //Not genesis block
                     await currentItem.validate() ? true : errorLog.push(`Block ${currentItem.height} hash does not validate`);
-                    //validate previousblockhash
                     currentItem.previousBlockHash === self.chain[currentItem.height-1].hash ? true : errorLog.push(`Block ${currentItem.height} previous hash does not validate`);
-                    return;
                 }
-            });
+            }));
+            // BELOW CODEE DOES NOT WORK DUE TO THE FOREACH NOT WAITING FOR PROMISES TO RESOLVE. SOLVED USING PROMISE.ALL()
+            // self.chain.forEach(async (currentItem) => {
+            //     if(currentItem.height === 0) {
+            //         //Genesis block
+            //         await currentItem.validate() ? true : errorLog.push("Genesis block does not validate");
+            //         return;
+            //     } else {
+            //         //Not genesis block
+            //         await currentItem.validate() ? true : errorLog.push(`Block ${currentItem.height} hash does not validate`);
+            //         //validate previousblockhash
+            //         currentItem.previousBlockHash === self.chain[currentItem.height-1].hash ? true : errorLog.push(`Block ${currentItem.height} previous hash does not validate`);
+            //         return;
+            //     }
+            // });
             resolve(errorLog);
         });
     }
